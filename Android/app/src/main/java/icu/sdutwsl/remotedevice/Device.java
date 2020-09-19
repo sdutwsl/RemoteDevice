@@ -1,8 +1,10 @@
 package icu.sdutwsl.remotedevice;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -25,31 +27,34 @@ import java.net.Socket;
 import java.net.SocketException;
 
 public class Device extends AppCompatActivity {
-    public boolean bAudioService=false;
-    public boolean bTouchpad=false;
-    public String destIP="";
-    public String destHostname="";
-    public int destPort=19972;
+    public boolean bAudioService = false;
+    public boolean bTouchpad = false;
+    public String destIP = "";
+    public String destHostname = "";
+    public int destPort = 19972;
     public TouchpadSender tTouchPad;
     //private boolean bLButtonDown=false;
     GestureDetector gestureDetector;
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
-    protected void onCreate(Bundle savedInstanceState)  {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device);
         //删除标题栏 hide action bar
         getSupportActionBar().hide();
-        gestureDetector=new GestureDetector(this,new MyGestureHandler());
+        gestureDetector = new GestureDetector(this, new MyGestureHandler());
         //触控监听
-        ((LinearLayout)findViewById(R.id.layout_touchpad)).setOnTouchListener(new View.OnTouchListener() {
-            private float oldX=0;
-            private float oldY=0;
+        ((LinearLayout) findViewById(R.id.layout_touchpad)).setOnTouchListener(new View.OnTouchListener() {
+            private float oldX = 0;
+            private float oldY = 0;
+
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                switch(motionEvent.getAction()){
+                switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        oldX=motionEvent.getX();
-                        oldY=motionEvent.getY();
+                        oldX = motionEvent.getX();
+                        oldY = motionEvent.getY();
                         // 处理输入的按下事件
                         //Log.e("DOWN","DOWN");
                         break;
@@ -57,15 +62,15 @@ public class Device extends AppCompatActivity {
                     case MotionEvent.ACTION_MOVE:
                         // 处理输入的移动 MOUSE_MOVE
                         //Log.e("Move",(motionEvent.getX()-oldX)+"   "+(motionEvent.getY()-oldY));
-                        float deltaX=motionEvent.getX()-oldX;
-                        float deltaY=motionEvent.getY()-oldY;
-                        tTouchPad.setSend("M#"+(int)(deltaX)+"#"+(int)(deltaY));
-                        oldX=motionEvent.getX();
-                        oldY=motionEvent.getY();
+                        float deltaX = motionEvent.getX() - oldX;
+                        float deltaY = motionEvent.getY() - oldY;
+                        tTouchPad.setSend("M#" + (int) (deltaX) + "#" + (int) (deltaY));
+                        oldX = motionEvent.getX();
+                        oldY = motionEvent.getY();
                         break;
-                        //每次都发送一次LBUTTON_UP
+                    //每次都发送一次LBUTTON_UP
                     case MotionEvent.ACTION_UP:
-                        Log.d("Pc",motionEvent.getPointerCount()+"");
+                        Log.d("Pc", motionEvent.getPointerCount() + "");
                         // 处理输入的离开事件
                         //双指则是左键双击
                         break;
@@ -75,46 +80,48 @@ public class Device extends AppCompatActivity {
             }
         });
         //垂直滚动条
-        ((LinearLayout)findViewById(R.id.layout_vscroll)).setOnTouchListener(new View.OnTouchListener() {
+        ((LinearLayout) findViewById(R.id.layout_vscroll)).setOnTouchListener(new View.OnTouchListener() {
             private float oldY;
+
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                switch (motionEvent.getAction()){
-                case MotionEvent.ACTION_DOWN:
-                    oldY=motionEvent.getY();
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    float delta=motionEvent.getY()-oldY;
-                    int i=(int)(delta/Math.abs(delta));
-                    tTouchPad.setSend("SV#"+i);
-                    break;
-            }
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        oldY = motionEvent.getY();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        float delta = motionEvent.getY() - oldY;
+                        int i = (int) (delta / Math.abs(delta));
+                        tTouchPad.setSend("SV#" + i);
+                        break;
+                }
                 return true;
             }
         });
         //水平滚动条
-        ((LinearLayout)findViewById(R.id.layout_hscroll)).setOnTouchListener(new View.OnTouchListener() {
+        ((LinearLayout) findViewById(R.id.layout_hscroll)).setOnTouchListener(new View.OnTouchListener() {
             private float oldX;
+
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                switch (motionEvent.getAction()){
+                switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        oldX=motionEvent.getX();
+                        oldX = motionEvent.getX();
                         break;
                     case MotionEvent.ACTION_MOVE:
-                        float delta=motionEvent.getX()-oldX;
-                        int i=(int)(delta/Math.abs(delta));
-                        tTouchPad.setSend("SH#"+i);
+                        float delta = motionEvent.getX() - oldX;
+                        int i = (int) (delta / Math.abs(delta));
+                        tTouchPad.setSend("SH#" + i);
                         break;
                 }
                 return true;
             }
         });
         //左右键
-        ((Button)findViewById(R.id.btn_lbutton)).setOnTouchListener(new View.OnTouchListener() {
+        ((Button) findViewById(R.id.btn_lbutton)).setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                switch (motionEvent.getAction()){
+                switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         tTouchPad.setSend("LD");
                         break;
@@ -125,10 +132,10 @@ public class Device extends AppCompatActivity {
                 return true;
             }
         });
-        ((Button)findViewById(R.id.btn_rbutton)).setOnTouchListener(new View.OnTouchListener() {
+        ((Button) findViewById(R.id.btn_rbutton)).setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                switch (motionEvent.getAction()){
+                switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         tTouchPad.setSend("RD");
                         break;
@@ -139,30 +146,30 @@ public class Device extends AppCompatActivity {
                 return true;
             }
         });
-        Intent intent=getIntent();
+        Intent intent = getIntent();
         //获取主机名与ip地址 get ip and hostname from intent
-        this.destHostname=intent.getStringExtra("name");
-        this.destIP=intent.getStringExtra("ip");
-        Log.d("IP",this.destIP);
-        this.bTouchpad=intent.getBooleanExtra("Touchpad",false);
-        this.bAudioService=intent.getBooleanExtra("AudioService",false);
+        this.destHostname = intent.getStringExtra("name");
+        this.destIP = intent.getStringExtra("ip");
+        Log.d("IP", this.destIP);
+        this.bTouchpad = intent.getBooleanExtra("Touchpad", false);
+        this.bAudioService = intent.getBooleanExtra("AudioService", false);
         new Thread(new KeepAlive()).start();
-        if(bTouchpad==true){
-            tTouchPad=new TouchpadSender();
+        if (bTouchpad == true) {
+            tTouchPad = new TouchpadSender();
             new Thread(tTouchPad).start();
         }
-        if(bAudioService==true){
-            Intent as=new Intent(this,AudioService.class);
-            startService(as);
+        if (bAudioService == true) {
+            Intent as = new Intent(this, AudioService.class);
+            startForegroundService(as);
         }
     }
 
-    private class MyGestureHandler implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener{
+    private class MyGestureHandler implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
 
         //左键单击 LBUTTON_CLICK
         @Override
         public boolean onSingleTapConfirmed(MotionEvent motionEvent) {
-            Log.e("LBUTTON","CLICK");
+            Log.e("LBUTTON", "CLICK");
             tTouchPad.setSend("Lc");
             return true;
         }
@@ -170,10 +177,11 @@ public class Device extends AppCompatActivity {
         //左键按下
         @Override
         public boolean onDoubleTap(MotionEvent motionEvent) {
-            Log.e("LBUTTON","DBCLICK");
+            Log.e("LBUTTON", "DBCLICK");
             tTouchPad.setSend("LC");
             return true;
         }
+
         //左键抬起
         @Override
         public boolean onDoubleTapEvent(MotionEvent motionEvent) {
@@ -204,7 +212,7 @@ public class Device extends AppCompatActivity {
 
         @Override
         public void onLongPress(MotionEvent motionEvent) {
-                Log.e("RBUTTON", "CLICK");
+            Log.e("RBUTTON", "CLICK");
             tTouchPad.setSend("RC");
         }
 
@@ -215,35 +223,37 @@ public class Device extends AppCompatActivity {
         }
     }
 
-    private class TouchpadSender implements Runnable{
-        private boolean bSend=false;
-        private String strSend="";
+    private class TouchpadSender implements Runnable {
+        private boolean bSend = false;
+        private String strSend = "";
         DatagramSocket ds;
         DatagramPacket dp;
-        public synchronized void setSend(String str){
-            this.strSend=str;
-            bSend=true;
+
+        public synchronized void setSend(String str) {
+            this.strSend = str;
+            bSend = true;
         }
+
         @Override
         public void run() {
             try {
-                ds=new DatagramSocket();
-                dp=new DatagramPacket(strSend.getBytes("GBK"),strSend.getBytes("GBK").length,new InetSocketAddress(destIP,19973));
+                ds = new DatagramSocket();
+                dp = new DatagramPacket(strSend.getBytes("GBK"), strSend.getBytes("GBK").length, new InetSocketAddress(destIP, 19973));
             } catch (SocketException | UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
-            while(true){
-                if (bSend){
+            while (true) {
+                if (bSend&&bTouchpad) {
                     try {
                         //Log.e("Send:   ",strSend+"  aim:"+dp.getAddress().toString());
-                        dp.setData(strSend.getBytes("GBK"),0,strSend.getBytes("GBK").length);
+                        dp.setData(strSend.getBytes("GBK"), 0, strSend.getBytes("GBK").length);
                         ds.send(dp);
-                        bSend=false;
+                        bSend = false;
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
-                        bSend=false;
+                        bSend = false;
                     } catch (IOException e) {
-                        bSend=false;
+                        bSend = false;
                         e.printStackTrace();
                     }
                 }
@@ -251,21 +261,22 @@ public class Device extends AppCompatActivity {
         }
     }
 
-    private class KeepAlive implements Runnable{
+    private class KeepAlive implements Runnable {
         public Socket sockKeepAlive;
+
         @Override
         public void run() {
             //Create tcp socket
             try {
-                sockKeepAlive=new Socket(destIP,destPort);
-                OutputStream os= sockKeepAlive.getOutputStream();
-                os.write(("Touchpad:"+bTouchpad).getBytes("GBK"));
+                sockKeepAlive = new Socket(destIP, destPort);
+                OutputStream os = sockKeepAlive.getOutputStream();
+                os.write(("Touchpad:" + bTouchpad).getBytes("GBK"));
                 os.flush();
                 Thread.sleep(100);
-                os.write(("Audio:"+bAudioService).getBytes("GBK"));
+                os.write(("Audio:" + bAudioService).getBytes("GBK"));
                 Thread.sleep(100);
                 os.flush();
-                while(true){
+                while (true) {
                     os.write("Alive".getBytes("GBK"));
                     Thread.sleep(100);
                 }

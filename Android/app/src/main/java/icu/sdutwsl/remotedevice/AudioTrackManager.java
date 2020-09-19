@@ -87,13 +87,15 @@ public class AudioTrackManager {
         mAudioTrack.stop();
         mAudioTrack.release();
     }
-    public static float[] byteArrayToFloatArray(byte[] bytes,int rlength) {
-        ByteBuffer buffer = ByteBuffer.wrap(bytes,0,rlength);
+
+    public static float[] byteArrayToFloatArray(byte[] bytes, int rlength) {
+        ByteBuffer buffer = ByteBuffer.wrap(bytes, 0, rlength);
         FloatBuffer fb = buffer.order(ByteOrder.LITTLE_ENDIAN).asFloatBuffer();
         float[] floatArray = new float[fb.limit()];
         fb.get(floatArray);
         return floatArray;
     }
+
     class PlayThread extends Thread {
         @Override
         public void run() {
@@ -106,17 +108,17 @@ public class AudioTrackManager {
                 //Socket client=s.accept();
                 //DataInputStream dis = new DataInputStream(
                 //        client.getInputStream());
-                ds=new DatagramSocket(11600);
-                byte []rb=new byte[65535];
-                DatagramPacket dp=new DatagramPacket(rb,rb.length);
+                ds = new DatagramSocket(11600);
+                byte[] rb = new byte[65535];
+                DatagramPacket dp = new DatagramPacket(rb, rb.length);
                 mAudioTrack.play();
                 //int count=0;
-                while(true) {
+                while (true) {
                     //dis.read(rb);
                     ds.receive(dp);
                     //Log.d("Recv data len=",""+rs);
-                    float []fb=byteArrayToFloatArray(dp.getData(),dp.getLength());
-                    mAudioTrack.write(fb,0,fb.length,AudioTrack.WRITE_NON_BLOCKING);
+                    float[] fb = byteArrayToFloatArray(dp.getData(), dp.getLength());
+                    mAudioTrack.write(fb, 0, fb.length, AudioTrack.WRITE_NON_BLOCKING);
                 }
             } catch (SocketException e) {
                 e.printStackTrace();
