@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>WebSocketTest</title>
+	<meta charset="utf-8" />
+	<style type="text/css">
+		body {
+			margin: 0;
+			padding: 0;
+			width: 100vw;
+			height: 100vh;
+			background: #555;
+		}
+
+		.touchpad {
+			width: 100vw;
+			height: 100vh;
+			background: cyan;
+			position: relative;
+			z-index: 10;
+			opacity: 0.5;
+		}
+		.left{
+			position: absolute;
+			z-index: 1;
+			left:0;
+			top: 0;
+			width: 50vw;
+			height: 10vh;
+			background: deeppink;
+		}
+		.right{
+			position: absolute;
+			z-index: 1;
+			left:50vw;
+			top: 0;
+			width: 50vw;
+			height: 10vh;
+			background: deeppink;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="touch_area" class="touchpad">
+	</div>
+	<div id="left" class="left"></div>
+	<div id="right" class="right"></div>
+</body>
+<script type="text/javascript">
+
+	window.onload = main
+	const socket = new WebSocket('ws://' + window.location.hostname + ':5000', 'echo-protocol');
+
+	let oldX = -1, oldY = -1;
+	function handleMove(e) {
+		if (-1 === oldX && -1 === oldY) {
+			oldX = e.changedTouches[0].clientX;
+			oldY = e.changedTouches[0].clientY;
+			return
+		}
+		let deltaX = e.changedTouches[0].clientX - oldX;
+		let deltaY = e.changedTouches[0].clientY - oldY;
+		console.log(deltaX, deltaY);
+		oldX = e.changedTouches[0].clientX;
+		oldY = e.changedTouches[0].clientY;
+		socket.send("M " + parseInt(deltaX/2) + "#" + parseInt(deltaY/2));
+	}
+
+	function handleClick(e){
+		let x=e.clientX,y=e.clientY;
+		let width=e.target.clientWidth,height=e.target.clientHeight/10;
+		if(x>width/2&&x<width&&y>0&&y<height){
+			socket.send("RC");
+		}else{
+			socket.send("Lc");
+		}
+	}
+	function handleTouchEnd(){
+		oldX=-1;
+		oldY=-1;
+	}
+
+	var pressTimer;
+
+	//mouseDown与mouseUp为
+	function main() {
+		document.body.addEventListener('touchmove', function (e) {
+			e.preventDefault(); //阻止默认的处理方式(阻止下拉滑动的效果)
+		}, { passive: false }); //passive 参数不能省略，用来兼容ios和android
+
+		let touch_area = document.querySelector("#touch_area");
+		let left_button=document.querySelector("#left_button");
+		let right_button=document.querySelector("#right_button");
+		touch_area.addEventListener("touchmove", handleMove, false);
+		touch_area.addEventListener("click",handleClick,false);
+		touch_area.addEventListener("touchend",handleTouchEnd,false);
+
+	}
+
+</script>
+
+</html>

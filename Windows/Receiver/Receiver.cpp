@@ -9,6 +9,8 @@ using namespace std;
 BOOL bAudioDone = FALSE;
 
 DWORD WINAPI KeepAliveThread(LPVOID){
+	//这句现在用来一直开启触控板
+
 	SOCKET sockKeepAlive = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (sockKeepAlive == SOCKET_ERROR) {
 		cout << "Create socket failed,sockkeepalive" << WSAGetLastError() << endl;
@@ -31,6 +33,8 @@ DWORD WINAPI KeepAliveThread(LPVOID){
 	int addrLen = sizeof(addrClient);
 	char bBuff[1024];
 	//Only handle on connection
+
+	CreateThread(NULL, 0, TouchPadThread, 0, 0, 0);
 	while ((sClient = accept(sockKeepAlive,(sockaddr*)&addrClient,&addrLen))!=INVALID_SOCKET) {
 		//cout << "Accept socket!" << endl;
 		int l = recv(sClient, bBuff, 1024, 0);
@@ -72,5 +76,7 @@ int main()
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 	CreateThread(NULL, 0, BroadPCThread, 0, 0, 0);
 	CreateThread(NULL, 0, KeepAliveThread, 0, 0, 0);
-	while (1);
+	while (1) {
+		Sleep(100000);
+	};
 }

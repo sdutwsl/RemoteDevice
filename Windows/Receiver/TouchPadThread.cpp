@@ -2,6 +2,7 @@
 
 DWORD WINAPI TouchPadThread(LPVOID) {
 
+	printf("touchpad!!");
 	//防止由于某些意外启动多个线程
 	CreateMutexA(0, true, "TouchThread");
 	if (ERROR_ALREADY_EXISTS == GetLastError()) {
@@ -46,6 +47,7 @@ DWORD WINAPI TouchPadThread(LPVOID) {
 		char temp1[64];
 		if (result >= 0)
 		{
+			printf("%s", szBuf);
 			szBuf[result] = 0;
 			//printf("接收数据为:  %s \n", szBuf);
 			switch (szBuf[0]) {
