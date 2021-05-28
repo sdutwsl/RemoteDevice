@@ -10,13 +10,13 @@ const dgram = require('dgram');
 const client = dgram.createSocket('udp4');
 
 var server = http.createServer(function(request, response) {
-    console.log((new Date()) + ' Received request for ' + request.url);
+    //console.log((new Date()) + ' Received request for ' + request.url);
     response.writeHead(200, { 'content-type': 'text/html' })
     fs.createReadStream('index.html').pipe(response)
 });
 
 server.listen(5000, function() {
-    console.log((new Date()) + ' Server is listening on port 5000');
+    //console.log((new Date()) + ' Server is listening on port 5000');
 });
 
 wsServer = new WebSocketServer({
@@ -38,7 +38,7 @@ wsServer.on('request', function(request) {
     if (!originIsAllowed(request.origin)) {
       // Make sure we only accept requests from an allowed origin
       request.reject();
-      console.log((new Date()) + ' Connection from origin ' + request.origin + ' rejected.');
+      //console.log((new Date()) + ' Connection from origin ' + request.origin + ' rejected.');
       return;
     }
     
@@ -47,11 +47,11 @@ wsServer.on('request', function(request) {
     connection.on('message', function(message) {
         if (message.type === 'utf8') {
             let str=message.utf8Data
-            console.log('Received Message: ' + str,typeof str);
-            client.send(Buffer.from(str), 19973, '127.0.0.1',err=>console.log(err));
+            //console.log('Received Message: ' + str,typeof str);
+            client.send(Buffer.from(str), 19973, '127.0.0.1');
         }
     });
     connection.on('close', function(reasonCode, description) {
-        console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+        //console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
     });
 });
